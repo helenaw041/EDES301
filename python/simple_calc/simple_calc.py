@@ -3,8 +3,11 @@
 --------------------------------------------------------------------------
 Simple Calculator
 --------------------------------------------------------------------------
+Author: Helena Wang |hw101 |at| rice |dot| edu|
+
+Copyright 2025 - Helena Wang
+
 License:   
-Copyright 2025 - <NAME>
 
 Redistribution and use in source and binary forms, with or without 
 modification, are permitted provided that the following conditions are met:
@@ -73,10 +76,21 @@ operators = {
     "+" : operator.add,
     "-" : operator.sub,
     "*" : operator.mul,
-    "/" : operator.truediv
+    "/" : operator.truediv,
+    ">>" : operator.rshift,
+    "<<" : operator.lshift,
+    "%" : operator.mod,
+    "**" : operator.pow
+    
 }
 
 
+# Redefine Input
+get_input = None # temp
+try:
+    get_input = raw_input
+except NameError:
+    get_input = input
 
 # ------------------------------------------------------------------------
 # Functions
@@ -92,12 +106,18 @@ def get_user_input():
         # NOTE - Use "pass" statements to allow code to be run without having to 
         # NOTE - fill out the contents.  This pass statement should be removed    
         
+        # NOTE - User input is generally returned as a string and must be translated.
         input1 = float(input("First Number:  "))
         input2 = float(input("Second Number:  "))
-        op     = input("Operation (+, -, *, /): ")
+        op     = input("Operation (+, -, *, /, >>, <<, %, **): ")
+        
+        if (op == '>>' or op == '<<'):
+            input1 = int(input1)
+            input2 = int(input2)
+        
         
         return (input1, input2, operators[op])
-        # NOTE - User input is generally returned as a string and must be translated.
+        
     except:
         print("Invalid Input")
         return (None, None, None)
