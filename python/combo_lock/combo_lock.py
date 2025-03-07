@@ -209,15 +209,19 @@ class CombinationLock():
             self.set_display_input(i+1)
 
             # Wait for button press (do nothing)
+            self.button.wait_for_press()
             
             # Set button unpressed callback function
+            self.button.set_unpressed_callback(self.show_analog_value)
 
             # Wait for button press (show analog value)
+            self.button.wait_for_press()
             
             # Get callback function value from button
-            value = 0
+            value = self.button.get_unpressed_callback_value()
             
             # Remove button unpressed callback function
+            self.button.set_unpressed_callback(None)
 
             # Record Analog value
             combination[i] = value
