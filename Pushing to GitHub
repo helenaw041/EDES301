@@ -1,0 +1,7 @@
+steps to push to github
+1. git add . 
+2. git commit -m "<some message>"
+3. git pull origin master
+4. git push 
+5. helenaw041
+6. Personal Access Token
