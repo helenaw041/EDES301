@@ -255,10 +255,13 @@ class CombinationLock():
                 self.set_display_prog()
                 
                 # Wait for button press (do nothing)
+                self.button.wait_for_press()
                 
                 # Get combination
+                combination = self.input_combination()
                 
                 # Lock the lock
+                self.lock()
         
                 # Set program lock to False
                 program = False
@@ -267,8 +270,10 @@ class CombinationLock():
             self.set_display_try()
 
             # Wait for button press (do nothing)
+            self.button.wait_for_press()
                 
             # Get combination
+            combo_attempt = self.input_combination()
 
             # Compare attempt against combination
             combo_pass = True
@@ -283,12 +288,19 @@ class CombinationLock():
                     
                     print("Combination Passed")
                 # Unlock the lock
+                self.unlock()
 
                 # Wait for button press
+                self.button.wait_for_press()
                 
                 # Get press duration
+                button_press_time = self.button.get_last_press_duration()
                 
                 # If greater than reset_time, program lock, else lock the lock
+                if (button_press_time > self.reset_time):
+                    program = True
+                else: 
+                    self.lock()
             
             time.sleep(1)
 
