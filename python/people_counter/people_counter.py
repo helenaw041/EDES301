@@ -43,8 +43,10 @@ Uses:
 """
 import time
 
-import ht16k33 as HT16K33
+import Adafruit_BBIO.GPIO as GPIO
+
 import button as BUTTON
+import ht16k33 as HT16K33
 
 
 # ------------------------------------------------------------------------
@@ -75,16 +77,16 @@ class PeopleCounter():
         self.button     = BUTTON.Button(button)
         self.display    = HT16K33.HT16K33(i2c_bus, i2c_address)
         
-        self._setup()
+        self._setup() # Setup method to initialize HW components
     
     # End def
     
     
     def _setup(self):
         """Setup the hardware components."""
-        # Initialize Display
+        # Initialize Display to "0000"
         
-        self.display.update(0)
+        self.display.clear()
         
 
         print("People Counter setup()")
@@ -98,26 +100,24 @@ class PeopleCounter():
         button_press_time            = 0.0      # Time button was pressed (in seconds)
         
         while(1):
+            
+            # Wait for button press / release
             self.button.wait_for_press()
+            
+            # Get the press time
             button_press_time = self.button.get_last_press_duration()
             
+            # Compare time to increment or reset people_count
             if (button_press_time >= self.reset_time):
                 people_count = 0
             else:
                 people_count += 1
             
+            # Update the display
             if (people_count > HT16K33.HT16K33_MAX_VALUE):
                 self.display.text("BIG")
             else:
                 self.display.update(people_count)
-    
-            # Wait for button press / release
-
-            # Get the press time
-
-            # Compare time to increment or reset people_count
-
-            # Update the display
 
     # End def
 
@@ -145,8 +145,8 @@ if __name__ == '__main__':
     print("Program Start")
 
     # Create instantiation of the people counter
-    
     people_counter = PeopleCounter()
+    # you can create multiple instances if you have multiple buttons but use button constructor parameter
 
     try:
         # Run the people counter

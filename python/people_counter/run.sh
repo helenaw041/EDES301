@@ -35,14 +35,25 @@
 # 
 # --------------------------------------------------------------------------
 
-
+# Shell scripts eliminate the need to type a lot. 
+# Changes our directory to where we want to run it: typically the main Python class 
 cd /var/lib/cloud9/EDES301/python/people_counter
 
 ./configure_pins.sh
 
+# List of directories of all non-system installed imports. 
+# Separated by a colon
+# Get through command "pwd": print working directory
+
+# Better to use absolute / (start from the root of the file system) 
+# rather than current ./ slash (start from the current file system)
 dirs=(
     "/var/lib/cloud9/EDES301/python/ht16k33:"
     "/var/lib/cloud9/EDES301/python/button:"
 )
 
+# Shell Scripts allow us to run all this at once in the terminal shell, which is faster 
+# if not in default directory, shell will not find it ./ means 
+
+# Concatenating the "dirs" list into a string for python to run 
 PYTHONPATH=$(IFS=; echo "${dirs[*]}") python3 people_counter.py

@@ -1,0 +1,10 @@
+1. 
+Error: Could not open file `/dev/i2c-1': Permission denied
+Run as root?
+A: use sudo 
+
+2. saying library doesn't exist even though i have it installed (like ADAfruitBBIO_): use python3 instead of python
+3.  "Permission Denied": chmod 755 grants read, write, execute permissions
+4. For Shell scripts: we need to mark them as executable using chmod 755; use ./ to run the script if in current directory 
+5. Error: Write Failed -- typically an error with wiring 
+
