@@ -93,6 +93,8 @@ import Adafruit_BBIO.GPIO as GPIO
 # Constants
 # ------------------------------------------------------------------------
 LED_PINS      = ["P2_2", "P2_4", "P2_6", "P2_8"]  # Pins for the LEDs
+TIMEZONES = ["Eastern", "Central", "Mountain", "Pacific"] 
+BUTTON_PIN = "P2_3"
 HIGH          = GPIO.HIGH
 LOW           = GPIO.LOW
 
@@ -101,6 +103,7 @@ LOW           = GPIO.LOW
 # ------------------------------------------------------------------------
 
 current_led = 0 # tracks the current LED 
+current_zone_index = 0  # Tracks which time zone is being displayed
 
 # ------------------------------------------------------------------------
 # Functions / Classes
@@ -126,7 +129,7 @@ class Button():
     on_release_callback_value     = None
     
     
-    def __init__(self, pin=None, press_low=True, sleep_time=0.1):
+    def __init__(self, pin=None, press_low=False, sleep_time=0.1):
         """ Initialize variables and set up the button """
         if (pin == None):
             raise ValueError("Pin not provided for Button()")
@@ -171,7 +174,8 @@ class Button():
                      False - Button is not pressed
         """
         # Return the comparison of input value of the GPIO pin of 
-        #   the buton (i.e. self.pin) to the "pressed value" of the class 
+        #   the buton (i.e. self.pin) to the "pressed value" of the class
+        
         return GPIO.input(self.pin) == 0
 
     # End def
@@ -256,6 +260,7 @@ class Button():
     def set_pressed_callback(self, function):
         """ Function excuted every "sleep_time" while the button is pressed """
         self.pressed_callback = function
+        
     
     # End def
 
@@ -309,16 +314,26 @@ class Button():
 
 def cycle_leds():
     """ Callback function to cycle through LEDs on button press """
-    global current_led
+    global current_led, current_zone_index
     # Turn off all LEDs
     for led_pin in LED_PINS:
         GPIO.output(led_pin, LOW)
 
     # Turn on the next LED in the cycle
     GPIO.output(LED_PINS[current_led], HIGH)
-
     # Update the current LED index for the next press
     current_led = (current_led + 1) % len(LED_PINS)  # Cycle between 0-3
+    
+    # Cycle through time zones
+    current_zone_index = (current_zone_index + 1) % len(TIMEZONES)
+    current_zone = TIMEZONES[current_zone_index]
+    
+    # Get the correct time object (this pulls from the API-updated values)
+    # if statements get all 4 objects from other file and use conditionals to display one. 
+    # time_obj = get_time_object_for(current_zone)
+    # Update LCD
+    # lcd.display_time(time_obj, current_zone)
+
 
 # ------------------------------------------------------------------------
 # Main script
@@ -335,7 +350,7 @@ if __name__ == '__main__':
     GPIO.output(LED_PINS[0], HIGH)  # First LED lights up on boot
     
     # Set the callback function to cycle LEDs on button press
-    button.set_pressed_callback(cycle_leds)
+    button.set_on_press_callback(cycle_leds)
     
 
     # Use a Keyboard Interrupt (i.e. "Ctrl-C") to exit the test
@@ -343,9 +358,13 @@ if __name__ == '__main__':
         while(True):
             # Wait for button press and cycle the LEDs
             button.wait_for_press()
+            # Check if the button is pressed
+            print("Is the button pressed?")
+            print("    {0}".format(button.is_pressed()))
+            print(GPIO.input(BUTTON_PIN))
             
     except KeyboardInterrupt:
         GPIO.cleanup()
 
     print("Test Complete")
-
+    
