@@ -89,7 +89,7 @@ import os
 import time
 import threading
 import newapi as API
-
+import newdisplay as DISPLAY
 import Adafruit_BBIO.GPIO as GPIO
 
 # ------------------------------------------------------------------------
@@ -100,6 +100,15 @@ TIMEZONES = ["Eastern", "Central", "Mountain", "Pacific"]
 BUTTON_PIN = "P2_3"
 HIGH          = GPIO.HIGH
 LOW           = GPIO.LOW
+# Define the LCD module pins
+LCD_RS = "P2_35"
+LCD_EN = "P2_33"
+LCD_D4 = "P2_19"
+LCD_D5 = "P2_17"
+LCD_D6 = "P1_04"
+LCD_D7 = "P1_02"
+# Initialize LCD
+lcd = DISPLAY.LCDDisplay(LCD_RS, LCD_EN, LCD_D4, LCD_D5, LCD_D6, LCD_D7)
 
 # ------------------------------------------------------------------------
 # Global variables
@@ -333,6 +342,7 @@ def cycle_leds():
         if current_zone_index == 0 and eastern_time:
             # lcd.display_line_1("Your Text")
             # lcd.display_line_2("Your Text")
+            # lcd.display_message("ET:" + eastern_time['dayOfWeek'], eastern_time['date'] + eastern_time['time'])
             print("ET:", eastern_time['dayOfWeek'])
             print(eastern_time['date'], eastern_time['time'])
         elif current_zone_index == 1 and central_time:
@@ -380,6 +390,7 @@ def update_times():
             if current_zone_index == 1 and eastern_time:
                 # lcd.display_line_1("Your Text")
                 # lcd.display_line_2("Your Text")
+                # lcd.display_message("ET:" + eastern_time['dayOfWeek'], eastern_time['date'] + eastern_time['time'])
                 print("ET:", eastern_time['dayOfWeek'])
                 print(eastern_time['date'], eastern_time['time'])
             elif current_zone_index == 2 and central_time:
@@ -406,6 +417,9 @@ def update_times():
 if __name__ == '__main__':
 
     print("LED cycling Button test")
+    
+    # Display static message
+    lcd.display_message("Hello!", "BeagleBone :)")
 
     # Create instantiation of the button
     button = Button("P2_3", press_low = False)
