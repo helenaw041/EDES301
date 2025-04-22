@@ -85,7 +85,10 @@ Software API:
 
 
 """
+import os
 import time
+import threading
+import newapi as API
 
 import Adafruit_BBIO.GPIO as GPIO
 
@@ -104,6 +107,7 @@ LOW           = GPIO.LOW
 
 current_led = 0 # tracks the current LED 
 current_zone_index = 0  # Tracks which time zone is being displayed
+
 
 # ------------------------------------------------------------------------
 # Functions / Classes
@@ -318,15 +322,43 @@ def cycle_leds():
     # Turn off all LEDs
     for led_pin in LED_PINS:
         GPIO.output(led_pin, LOW)
+    
+    
+    try:
+        eastern_time = API.get_current_time(timezone='America/New_York')
+        central_time = API.get_current_time(timezone='America/Chicago')
+        mountain_time = API.get_current_time(timezone='America/Denver')
+        pacific_time = API.get_current_time(timezone='America/Los_Angeles')
 
-    # Turn on the next LED in the cycle
-    GPIO.output(LED_PINS[current_led], HIGH)
-    # Update the current LED index for the next press
-    current_led = (current_led + 1) % len(LED_PINS)  # Cycle between 0-3
+        if current_zone_index == 0 and eastern_time:
+            # lcd.display_line_1("Your Text")
+            # lcd.display_line_2("Your Text")
+            print("ET:", eastern_time['dayOfWeek'])
+            print(eastern_time['date'], eastern_time['time'])
+        elif current_zone_index == 1 and central_time:
+            print("CT:", central_time['dayOfWeek'])
+            print(central_time['date'], central_time['time'])
+        elif current_zone_index == 2 and mountain_time:
+            print("MT:", mountain_time['dayOfWeek'])
+            print(mountain_time['date'], mountain_time['time'])
+        elif current_zone_index == 3 and pacific_time:
+            print("PT:", pacific_time['dayOfWeek'])
+            print(pacific_time['date'], pacific_time['time'])
+        else:
+            print("Retrieving...")
+
+    except Exception as e:
+        print("Error fetching time:", e)
+    
     
     # Cycle through time zones
     current_zone_index = (current_zone_index + 1) % len(TIMEZONES)
     current_zone = TIMEZONES[current_zone_index]
+    
+    # Turn on the next LED in the cycle
+    GPIO.output(LED_PINS[current_led], HIGH)
+    # Update the current LED index for the next press
+    current_led = (current_led + 1) % len(LED_PINS)  # Cycle between 0-3
     
     # Get the correct time object (this pulls from the API-updated values)
     # if statements get all 4 objects from other file and use conditionals to display one. 
@@ -334,7 +366,39 @@ def cycle_leds():
     # Update LCD
     # lcd.display_time(time_obj, current_zone)
 
-
+def update_times():
+    global eastern_time, central_time, mountain_time, pacific_time
+    
+    while True:
+        try:
+            eastern_time = API.get_current_time(timezone='America/New_York')
+            central_time = API.get_current_time(timezone='America/Chicago')
+            mountain_time = API.get_current_time(timezone='America/Denver')
+            pacific_time = API.get_current_time(timezone='America/Los_Angeles')
+            
+            print("\n[Time Update]")
+            if current_zone_index == 1 and eastern_time:
+                # lcd.display_line_1("Your Text")
+                # lcd.display_line_2("Your Text")
+                print("ET:", eastern_time['dayOfWeek'])
+                print(eastern_time['date'], eastern_time['time'])
+            elif current_zone_index == 2 and central_time:
+                print("CT:", central_time['dayOfWeek'])
+                print(central_time['date'], central_time['time'])
+            elif current_zone_index == 3 and mountain_time:
+                print("MT:", mountain_time['dayOfWeek'])
+                print(mountain_time['date'], mountain_time['time'])
+            elif current_zone_index == 0 and pacific_time:
+                print("PT:", pacific_time['dayOfWeek'])
+                print(pacific_time['date'], pacific_time['time'])
+            else:
+                print("Retrieving...")
+            print("--------------------------------------------------")
+            
+        except Exception as e:
+            print(f"[Error] Failed to update time: {e}")
+        time.sleep(15)  # Wait 30 seconds
+        
 # ------------------------------------------------------------------------
 # Main script
 # ------------------------------------------------------------------------
@@ -352,6 +416,9 @@ if __name__ == '__main__':
     # Set the callback function to cycle LEDs on button press
     button.set_on_press_callback(cycle_leds)
     
+    # Start time updater thread
+    time_thread = threading.Thread(target=update_times, daemon=True)
+    time_thread.start()
 
     # Use a Keyboard Interrupt (i.e. "Ctrl-C") to exit the test
     try:
@@ -364,7 +431,10 @@ if __name__ == '__main__':
             print(GPIO.input(BUTTON_PIN))
             
     except KeyboardInterrupt:
+        for led_pin in LED_PINS:
+            GPIO.output(led_pin, LOW)
         GPIO.cleanup()
+        
 
     print("Test Complete")
     

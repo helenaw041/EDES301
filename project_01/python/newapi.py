@@ -29,13 +29,20 @@ def convert_time_zone(from_timezone, to_timezone, date_time):
      
 # Example usage
 if __name__ == "__main__":
-    current_time_utc = get_current_time()
-    if current_time_utc:
-        print("Current time in UTC:", current_time_utc)
+    eastern_time = get_current_time(timezone='America/New_York')
+    central_time = get_current_time(timezone='America/Chicago')
+    mountain_time = get_current_time(timezone='America/Denver')
+    pacific_time = get_current_time(timezone='America/Los_Angeles')
 
-    current_time_pacific = get_current_time(timezone='America/Los_Angeles')
-    if current_time_pacific:
-        print("Current time in Los Angeles:", current_time_pacific)
+    if eastern_time:
+        print("Current time in Eastern Time (New York):", eastern_time)
+    if central_time:
+        print("Current time in Central Time (Chicago):", central_time)
+    if mountain_time:
+        print("Current time in Mountain Time (Denver):", mountain_time)
+    if pacific_time:
+        print("Current time in Pacific Time (Los Angeles):", pacific_time)
+    
     
     converted_time = convert_time_zone(from_timezone="UTC", to_timezone="America/New_York", date_time="2023-10-20T10:00:00")
     if converted_time:
