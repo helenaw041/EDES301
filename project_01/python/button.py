@@ -88,9 +88,12 @@ Software API:
 import os
 import time
 import threading
+import board
+import digitalio
 import newapi as API
-import newdisplay as DISPLAY
+import display as DISPLAY
 import Adafruit_BBIO.GPIO as GPIO
+import adafruit_character_lcd.character_lcd
 
 # ------------------------------------------------------------------------
 # Constants
@@ -101,14 +104,16 @@ BUTTON_PIN = "P2_3"
 HIGH          = GPIO.HIGH
 LOW           = GPIO.LOW
 # Define the LCD module pins
-LCD_RS = "P2_35"
-LCD_EN = "P2_33"
-LCD_D4 = "P2_19"
-LCD_D5 = "P2_17"
-LCD_D6 = "P1_04"
-LCD_D7 = "P1_02"
-# Initialize LCD
-lcd = DISPLAY.LCDDisplay(LCD_RS, LCD_EN, LCD_D4, LCD_D5, LCD_D6, LCD_D7)
+LCD_RS = digitalio.DigitalInOut(board.P2_35)
+LCD_EN = digitalio.DigitalInOut(board.P2_33)
+LCD_D4 = digitalio.DigitalInOut(board.P2_24)
+LCD_D5 = digitalio.DigitalInOut(board.P2_22)
+LCD_D6 = digitalio.DigitalInOut(board.P2_20)
+LCD_D7 = digitalio.DigitalInOut(board.P2_18)
+
+# Setup the LCD
+lcd = adafruit_character_lcd.character_lcd.Character_LCD(LCD_RS, LCD_EN, LCD_D4, LCD_D5, LCD_D6, LCD_D7,
+                       columns=16, lines=2)
 
 # ------------------------------------------------------------------------
 # Global variables
@@ -340,18 +345,23 @@ def cycle_leds():
         pacific_time = API.get_current_time(timezone='America/Los_Angeles')
 
         if current_zone_index == 0 and eastern_time:
-            # lcd.display_line_1("Your Text")
-            # lcd.display_line_2("Your Text")
-            # lcd.display_message("ET:" + eastern_time['dayOfWeek'], eastern_time['date'] + eastern_time['time'])
+            lcd.clear()
+            lcd.message = "ET:" + eastern_time['dayOfWeek'] + "\n" + eastern_time['date'] + " " + eastern_time['time']
             print("ET:", eastern_time['dayOfWeek'])
             print(eastern_time['date'], eastern_time['time'])
         elif current_zone_index == 1 and central_time:
+            lcd.clear()
+            lcd.message = "CT:" + central_time['dayOfWeek'] + "\n" + central_time['date'] + " " + central_time['time']
             print("CT:", central_time['dayOfWeek'])
             print(central_time['date'], central_time['time'])
         elif current_zone_index == 2 and mountain_time:
+            lcd.clear()
+            lcd.message = "MT:" + mountain_time['dayOfWeek'] + "\n" + mountain_time['date'] + " " + mountain_time['time']
             print("MT:", mountain_time['dayOfWeek'])
             print(mountain_time['date'], mountain_time['time'])
         elif current_zone_index == 3 and pacific_time:
+            lcd.clear()
+            lcd.message = "PT:" + pacific_time['dayOfWeek'] + "\n" + pacific_time['date'] + " " + pacific_time['time']
             print("PT:", pacific_time['dayOfWeek'])
             print(pacific_time['date'], pacific_time['time'])
         else:
@@ -388,18 +398,23 @@ def update_times():
             
             print("\n[Time Update]")
             if current_zone_index == 1 and eastern_time:
-                # lcd.display_line_1("Your Text")
-                # lcd.display_line_2("Your Text")
-                # lcd.display_message("ET:" + eastern_time['dayOfWeek'], eastern_time['date'] + eastern_time['time'])
+                lcd.clear()
+                lcd.message = "ET:" + eastern_time['dayOfWeek'] + "\n" + eastern_time['date'] + " " + eastern_time['time']
                 print("ET:", eastern_time['dayOfWeek'])
                 print(eastern_time['date'], eastern_time['time'])
             elif current_zone_index == 2 and central_time:
+                lcd.clear()
+                lcd.message = "CT:" + central_time['dayOfWeek'] + "\n" + central_time['date'] + " " + central_time['time']
                 print("CT:", central_time['dayOfWeek'])
                 print(central_time['date'], central_time['time'])
             elif current_zone_index == 3 and mountain_time:
+                lcd.clear()
+                lcd.message = "MT:" + mountain_time['dayOfWeek'] + "\n" + mountain_time['date'] + " " + mountain_time['time']
                 print("MT:", mountain_time['dayOfWeek'])
                 print(mountain_time['date'], mountain_time['time'])
             elif current_zone_index == 0 and pacific_time:
+                lcd.clear()
+                lcd.message = "PT:" + pacific_time['dayOfWeek'] + "\n" + pacific_time['date'] + " " + pacific_time['time']
                 print("PT:", pacific_time['dayOfWeek'])
                 print(pacific_time['date'], pacific_time['time'])
             else:
@@ -418,9 +433,6 @@ if __name__ == '__main__':
 
     print("LED cycling Button test")
     
-    # Display static message
-    lcd.display_message("Hello!", "BeagleBone :)")
-
     # Create instantiation of the button
     button = Button("P2_3", press_low = False)
     
