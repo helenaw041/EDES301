@@ -94,13 +94,15 @@ import newapi as API
 import display as DISPLAY
 import Adafruit_BBIO.GPIO as GPIO
 import adafruit_character_lcd.character_lcd
+import weatherapi as WEATHER
 
 # ------------------------------------------------------------------------
 # Constants
 # ------------------------------------------------------------------------
 LED_PINS      = ["P2_2", "P2_4", "P2_6", "P2_8"]  # Pins for the LEDs
 TIMEZONES = ["Eastern", "Central", "Mountain", "Pacific"] 
-BUTTON_PIN = "P2_3"
+BUTTONTIME_PIN = "P2_3"
+BUTTONTEMP_PIN = "P2_19"
 HIGH          = GPIO.HIGH
 LOW           = GPIO.LOW
 # Define the LCD module pins
@@ -425,6 +427,13 @@ def update_times():
             print(f"[Error] Failed to update time: {e}")
         time.sleep(15)  # Wait 30 seconds
         
+def show_weather():
+    weather = WEATHER.get_weather("Houston")
+    if button_temp.is_pressed():
+        lcd.clear()
+        lcd.message = "" + weather['location'] + ": " + str(weather['temp_f']) + "°F" + "\n" + weather['condition']
+
+
 # ------------------------------------------------------------------------
 # Main script
 # ------------------------------------------------------------------------
@@ -433,34 +442,69 @@ if __name__ == '__main__':
 
     print("LED cycling Button test")
     
-    # Create instantiation of the button
-    button = Button("P2_3", press_low = False)
+    # Create instantiation of the buttons
+    button_time = Button("P2_3", press_low = False)
+    button_temp = Button("P2_19", press_low = False)
     
     # Set the initial LED state (first LED ON)
     GPIO.output(LED_PINS[0], HIGH)  # First LED lights up on boot
     
     # Set the callback function to cycle LEDs on button press
-    button.set_on_press_callback(cycle_leds)
+    button_time.set_on_press_callback(cycle_leds)
+    
+    # Set the callback function to get weather on button press
+    button_temp.set_on_press_callback(show_weather)
     
     # Start time updater thread
     time_thread = threading.Thread(target=update_times, daemon=True)
     time_thread.start()
+    
+    
+    
+    
+    
+    # Start weather button listener in its own thread
+    def weather_loop():
+        while True:
+            button_temp.wait_for_press()
 
-    # Use a Keyboard Interrupt (i.e. "Ctrl-C") to exit the test
+    weather_thread = threading.Thread(target=weather_loop, daemon=True)
+    weather_thread.start()
+
+    # Main loop for time button
     try:
-        while(True):
-            # Wait for button press and cycle the LEDs
-            button.wait_for_press()
-            # Check if the button is pressed
+        while True:
+            button_time.wait_for_press()
+            Check if the button is pressed
             print("Is the button pressed?")
-            print("    {0}".format(button.is_pressed()))
-            print(GPIO.input(BUTTON_PIN))
+            print("    {0}".format(button_time.is_pressed()))
+            print(GPIO.input(BUTTONTIME_PIN))
             
     except KeyboardInterrupt:
         for led_pin in LED_PINS:
             GPIO.output(led_pin, LOW)
         GPIO.cleanup()
+        print("Exiting program.")
+
+
+    
+    # # Use a Keyboard Interrupt (i.e. "Ctrl-C") to exit the test
+    # try:
+    #     while(True):
+    #         # Wait for button press and cycle the LEDs
+    #         button_time.wait_for_press()
+    #         # Wait for button press and switch to weather display
+    #         button_temp.wait_for_press()
+    #         # Check if the button is pressed
+    #         print("Is the button pressed?")
+    #         print("    {0}".format(button_time.is_pressed()))
+    #         print(GPIO.input(BUTTONTIME_PIN))
+            
+    # except KeyboardInterrupt:
+    #     for led_pin in LED_PINS:
+    #         GPIO.output(led_pin, LOW)
+    #     GPIO.cleanup()
         
 
-    print("Test Complete")
+    # print("Test Complete")
     
