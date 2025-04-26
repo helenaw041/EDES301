@@ -6,3 +6,4 @@
 4. "weatherapi.py" contains function definitions to retrieve temperature and weather conditions data from "http://api.weatherapi.com"
 5. NOTE: Replace line 56 in "weatherapi.py" with your own API Key
 6. "button.py" is the main file and controls the two buttons (button 1 cycles between time zones and button 2 displays temperature and weather for 5 seconds)
+7. NOTE: Replace line 431 in "button.py" with city of your choice. 
