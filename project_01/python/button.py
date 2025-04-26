@@ -1,6 +1,6 @@
 """
 --------------------------------------------------------------------------
-Button Driver with LED Cycling
+Button Driver with LED Cycling (Main)
 --------------------------------------------------------------------------
 License:   
 Copyright 2025 - Helena Wang
@@ -431,7 +431,7 @@ def show_weather():
     weather = WEATHER.get_weather("Houston")
     if button_temp.is_pressed():
         lcd.clear()
-        lcd.message = "" + weather['location'] + ": " + str(weather['temp_f']) + "°F" + "\n" + weather['condition']
+        lcd.message = "" + weather['location'] + ": " + str(weather['temp_f']) + "°F" + "\n" + weather['condition'][:16]
 
 
 # ------------------------------------------------------------------------
@@ -475,7 +475,7 @@ if __name__ == '__main__':
     try:
         while True:
             button_time.wait_for_press()
-            Check if the button is pressed
+            # Check if the button is pressed
             print("Is the button pressed?")
             print("    {0}".format(button_time.is_pressed()))
             print(GPIO.input(BUTTONTIME_PIN))
